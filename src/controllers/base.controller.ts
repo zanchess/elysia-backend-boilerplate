@@ -2,7 +2,6 @@ import { Elysia } from 'elysia';
 import { ApiResponse } from '../types/api.types';
 import { jwt } from '@elysiajs/jwt';
 import { AppError } from '../errors/base.error';
-import { timestamp } from 'drizzle-orm/gel-core';
 
 export abstract class BaseController {
   protected abstract prefix: string;

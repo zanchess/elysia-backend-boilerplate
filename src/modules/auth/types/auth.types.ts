@@ -1,8 +1,3 @@
-export interface JWTPayload {
-  userId: number;
-  [key: string]: any;
-}
-
 export interface RegisterDto {
   email: string;
   password: string;
