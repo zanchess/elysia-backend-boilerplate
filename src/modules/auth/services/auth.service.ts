@@ -3,6 +3,7 @@ import { JwtService } from './jwt.service';
 import { ERROR_MESSAGES } from '../../../constants/error.messages';
 import { AuthenticationError, ConflictError } from '../../../errors/base.error';
 import { UserRepository } from '../../users/repositories/user.repository';
+import bcrypt from 'bcrypt';
 
 export class AuthService {
   private jwtService: JwtService;
@@ -40,7 +41,7 @@ export class AuthService {
       throw new AuthenticationError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    if (user.password !== data.password) {
+    if (await bcrypt.compare(data.password, user.password)) {
       throw new AuthenticationError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
