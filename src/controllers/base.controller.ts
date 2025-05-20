@@ -11,7 +11,7 @@ export abstract class BaseController {
     return {
       success: true,
       data,
-      message
+      message,
     };
   }
 
@@ -20,8 +20,8 @@ export abstract class BaseController {
       success: false,
       error: {
         message,
-        code
-      }
+        code,
+      },
     };
   }
 
@@ -29,23 +29,24 @@ export abstract class BaseController {
 
   public getRoutes(): Elysia {
     return new Elysia({ prefix: this.prefix })
-      .use(jwt({
-        name: 'jwt',
-        secret: process.env.JWT_SECRET || 'your-secret-key'
-      }))
+      .use(
+        jwt({
+          name: 'jwt',
+          secret: process.env.JWT_SECRET || 'your-secret-key',
+        })
+      )
       .onError(({ error, set }) => {
-        console.error('Base controller error:', error.code);
         set.status = (error as AppError).statusCode;
         set.headers['content-type'] = 'application/json';
         return {
           success: false,
           error: {
             message: (error as AppError).message || 'Internal server error',
-            code: (error as AppError).code
+            code: (error as AppError).code,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       })
       .use(this.routes()) as unknown as Elysia;
   }
-} 
+}

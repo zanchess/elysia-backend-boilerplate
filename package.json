@@ -5,7 +5,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "generate": "drizzle-kit generate:pg",
-    "migrate": "bun run src/db/migrate.ts"
+    "migrate": "bun run src/db/migrate.ts",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json}\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.3.3",
@@ -25,8 +29,14 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.19",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.1",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   },
   "module": "src/index.js"

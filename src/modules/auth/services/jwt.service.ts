@@ -13,10 +13,9 @@ export class JwtService {
 
   async verify(token: string): Promise<{ userId: number } | null> {
     try {
-      const decoded = jwt.verify(token, this.secret) as { userId: number };
-      return decoded;
+      return jwt.verify(token, this.secret) as { userId: number };
     } catch {
       return null;
     }
   }
-} 
+}

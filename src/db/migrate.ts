@@ -8,16 +8,16 @@ const runMigration = async () => {
   const db = drizzle(sql);
 
   console.log('Running migrations...');
-  
+
   await migrate(db, { migrationsFolder: 'drizzle' });
-  
+
   console.log('Migrations completed!');
-  
+
   await sql.end();
 };
 
-runMigration().catch((err) => {
+runMigration().catch(err => {
   console.error('Migration failed!');
   console.error(err);
   process.exit(1);
-}); 
+});

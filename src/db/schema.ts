@@ -7,5 +7,5 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   isDeleted: boolean('is_deleted').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
-}); 
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
