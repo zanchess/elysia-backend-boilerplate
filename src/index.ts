@@ -17,7 +17,7 @@ const app = new Elysia()
       info: {
         title: 'Elysia API Documentation',
         version: '1.0.0',
-        description: 'API documentation for Elysia application'
+        description: 'API documentation for Elysia application',
       },
       tags: [
         { name: 'auth', description: 'Authentication endpoints' },

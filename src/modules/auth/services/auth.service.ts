@@ -1,125 +1,87 @@
-import { UserRepository } from '../../users/repositories/user.repository';
-import { AUTH_SUCCESS } from '../../../constants/success.messages';
-import { AUTH_ERRORS } from '../../../constants/error.messages';
-import { ApiResponse } from '../../../types/common.types';
-import { User, UserResponse } from '../../users/types/user.types';
+import { db } from '../../../db';
+import { users } from '../../../db/schema';
+import { eq } from 'drizzle-orm';
 import { RegisterDto, LoginDto } from '../types/auth.types';
-import { Elysia } from 'elysia';
-import bcrypt from 'bcryptjs';
-import { jwt } from '@elysiajs/jwt';
+import { JwtService } from './jwt.service';
+import { ERROR_MESSAGES } from '../../../constants/error.messages';
+import { NotFoundError, AuthenticationError, ConflictError } from '../../../errors/base.error';
 
 export class AuthService {
-  private userRepository: UserRepository;
-  private jwtInstance: ReturnType<typeof jwt>;
+  private jwtService: JwtService;
 
   constructor() {
-    this.userRepository = new UserRepository();
-    this.jwtInstance = jwt({
-      name: 'jwt',
-      secret: process.env.JWT_SECRET || 'your-secret-key'
+    this.jwtService = new JwtService();
+  }
+
+  async register(data: RegisterDto) {
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, data.email)
     });
+
+    if (existingUser) {
+      throw new ConflictError(ERROR_MESSAGES.USER_EXISTS);
+    }
+
+    const [user] = await db.insert(users).values({
+      email: data.email,
+      password: data.password,
+      name: data.name
+    }).returning();
+
+    if (!user) {
+      throw new Error(ERROR_MESSAGES.USER_CREATION_FAILED);
+    }
+
+    return user;
   }
 
-  async register(userData: RegisterDto): Promise<UserResponse> {
-    try {
-      const existingUser = await this.userRepository.findByEmail(userData.email);
-      
-      if (existingUser) {
-        throw new Error('User with this email already exists');
-      }
-      
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      
-      const user = await this.userRepository.create({
-        ...userData,
-        password: hashedPassword
-      });
-      
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Failed to register user');
+  async login(data: LoginDto) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, data.email)
+    });
+
+    if (!user) {
+      throw new AuthenticationError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
+
+    if (user.password !== data.password) {
+      throw new AuthenticationError(ERROR_MESSAGES.INVALID_CREDENTIALS);
+    }
+
+    const token = await this.jwtService.sign({ userId: user.id });
+
+    return {
+      token,
+      user
+    };
   }
 
-  async login(credentials: LoginDto): Promise<{ token: string; user: UserResponse }> {
-    try {
-      const user = await this.userRepository.findByEmail(credentials.email);
-      
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
-      
-      const isValidPassword = await bcrypt.compare(credentials.password, user.password);
-      
-      if (!isValidPassword) {
-        throw new Error('Invalid credentials');
-      }
-      
-      const token = await this.jwtInstance.sign({ userId: user.id });
-      
-      return {
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name
-        }
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Failed to login');
+  async getProfile(userId: number) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
+
+    return user;
   }
 
-  async getProfile(userId: number): Promise<ApiResponse<UserResponse>> {
-    try {
-      const user = await this.userRepository.findById(userId);
-      
-      if (!user) {
-        return {
-          success: false,
-          error: AUTH_ERRORS.USER_NOT_FOUND
-        };
-      }
-      
-      return {
-        success: true,
-        data: {
-          id: user.id,
-          email: user.email,
-          name: user.name
-        }
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: AUTH_ERRORS.PROFILE_FETCH_FAILED
-      };
-    }
-  }
+  async deleteUser(userId: number) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
 
-  async deleteUser(userId: number): Promise<ApiResponse> {
-    try {
-      await this.userRepository.delete(userId);
-      
-      return {
-        success: true,
-        message: AUTH_SUCCESS.DELETED
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: AUTH_ERRORS.DELETE_FAILED
-      };
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
+
+    await db.delete(users).where(eq(users.id, userId));
+
+    return {
+      success: true,
+      message: 'User deleted successfully'
+    };
   }
 } 

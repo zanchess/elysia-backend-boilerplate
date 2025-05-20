@@ -1,28 +1,33 @@
-import { Elysia } from 'elysia';
-import { z } from 'zod';
+import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../../../middleware/auth.middleware';
 import { BaseController } from '../../../controllers/base.controller';
 import { UserService } from '../services/user.service';
+import { UserResponse, UpdateUserDto } from '../types/user.types';
+import { NotFoundError } from '../../../errors/base.error';
 
-const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
-  email: z.string().email().optional()
+const updateUserSchema = t.Object({
+  email: t.Optional(t.String({ format: 'email', description: 'User email address' })),
+  name: t.Optional(t.String({ minLength: 2, description: 'User full name' }))
 });
 
-interface JWTPayload {
-  userId: number;
-  [key: string]: any;
-}
+const userResponseSchema = t.Object({
+  success: t.Boolean(),
+  data: t.Object({
+    id: t.Number(),
+    email: t.String(),
+    name: t.String()
+  }),
+  message: t.Optional(t.String())
+});
 
-interface Context {
-  body: unknown;
-  jwt: {
-    sign: (payload: JWTPayload) => Promise<string>;
-    verify: (token: string) => Promise<JWTPayload | null>;
-  };
-  headers: Record<string, string | undefined>;
-  requireAuth: () => Promise<JWTPayload>;
-}
+const errorResponseSchema = t.Object({
+  success: t.Boolean(),
+  error: t.Object({
+    message: t.String(),
+    code: t.String(),
+    details: t.Optional(t.String())
+  })
+});
 
 export class UserController extends BaseController {
   protected prefix = '/users';
@@ -37,52 +42,139 @@ export class UserController extends BaseController {
     return (
       new Elysia()
         .use(authMiddleware)
-        .get('/', async ({ requireAuth }: Context) => {
-          try {
-            const payload = await requireAuth();
-            return await this.userService.getProfile(payload.userId);
-          } catch (error) {
-            return this.error('Failed to get profile');
-          }
-        }, {
-          detail: {
-            tags: ['users'],
-            summary: 'Get user profile',
-            description: 'Returns the authenticated user profile'
-          }
-        })
-        .put('/', async ({ body, requireAuth }: Context) => {
-          try {
-            const payload = await requireAuth();
-            const userData = updateUserSchema.parse(body);
-            return await this.userService.updateUser(payload.userId, userData);
-          } catch (error) {
-            if (error instanceof z.ZodError) {
-              return this.error('Validation error: ' + error.errors.map(e => e.message).join(', '));
+        // Get current user profile
+        .get('/me',
+          async ({ requireAuth, request }) => {
+            const payload = await requireAuth(request);
+            const user = await this.userService.getProfile(payload.userId);
+            return { success: true, data: user };
+          },
+          {
+            response: {
+              200: userResponseSchema,
+              404: errorResponseSchema
+            },
+            detail: {
+              tags: ['Users'],
+              summary: 'Get current user profile',
+              description: 'Retrieves the profile of the currently authenticated user',
+              security: [{ bearerAuth: [] }]
             }
-            return this.error('Failed to update user');
           }
-        }, {
-          detail: {
-            tags: ['users'],
-            summary: 'Update user profile',
-            description: 'Updates the authenticated user profile'
+        )
+        // Update current user profile
+        .put('/me',
+          async ({ requireAuth, request, body }) => {
+            const payload = await requireAuth(request);
+            const user = await this.userService.updateUser(
+              payload.userId,
+              body as UpdateUserDto
+            );
+            return { success: true, data: user };
+          },
+          {
+            body: updateUserSchema,
+            response: {
+              200: userResponseSchema,
+              400: errorResponseSchema,
+              404: errorResponseSchema
+            },
+            detail: {
+              tags: ['Users'],
+              summary: 'Update current user profile',
+              description: 'Updates the profile of the currently authenticated user',
+              security: [{ bearerAuth: [] }]
+            }
           }
-        })
-        .delete('/', async ({ requireAuth }: Context) => {
-          try {
-            const payload = await requireAuth();
-            return await this.userService.deleteUser(payload.userId);
-          } catch (error) {
-            return this.error('Failed to delete user');
+        )
+        // Delete current user profile
+        .delete('/me',
+          async ({ requireAuth, request }) => {
+            const payload = await requireAuth(request);
+            await this.userService.deleteUser(payload.userId);
+            return {
+              success: true,
+              message: 'User deleted successfully'
+            };
+          },
+          {
+            response: {
+              200: t.Object({
+                success: t.Boolean(),
+                message: t.Optional(t.String())
+              }),
+              404: errorResponseSchema
+            },
+            detail: {
+              tags: ['Users'],
+              summary: 'Delete current user profile',
+              description: 'Deletes the profile of the currently authenticated user',
+              security: [{ bearerAuth: [] }]
+            }
           }
-        }, {
-          detail: {
-            tags: ['users'],
-            summary: 'Delete user profile',
-            description: 'Deletes the authenticated user account'
+        )
+        // Get user by ID
+        .get('/:id',
+          async ({ requireAuth, request, params }) => {
+            console.error('get user by id');
+            await requireAuth(request); // Require authentication but don't use the ID
+            const user = await this.userService.getUser(Number(params.id));
+            return { success: true, data: user };
+          },
+          {
+            params: t.Object({
+              id: t.Number({ description: 'User ID' })
+            }),
+            response: {
+              200: userResponseSchema,
+              404: errorResponseSchema
+            },
+            detail: {
+              tags: ['Users'],
+              summary: 'Get user by ID',
+              description: 'Retrieves a user profile by their ID',
+              security: [{ bearerAuth: [] }],
+              examples: [{
+                response: {
+                  success: true,
+                  data: {
+                    id: 1,
+                    email: 'user@example.com',
+                    name: 'John Doe'
+                  }
+                }
+              }]
+            }
           }
-        })
+        )
+        // Update user by ID
+        .put('/:id',
+          async ({ requireAuth, request, params, body }) => {
+            await requireAuth(request); // Require authentication but don't use the ID
+            const user = await this.userService.updateUser(
+              Number(params.id),
+              body as UpdateUserDto
+            );
+            return { success: true, data: user };
+          },
+          {
+            params: t.Object({
+              id: t.Number({ description: 'User ID' })
+            }),
+            body: updateUserSchema,
+            response: {
+              200: userResponseSchema,
+              400: errorResponseSchema,
+              404: errorResponseSchema
+            },
+            detail: {
+              tags: ['Users'],
+              summary: 'Update user by ID',
+              description: 'Updates a user profile with the provided data',
+              security: [{ bearerAuth: [] }]
+            }
+          }
+        )
     ) as unknown as Elysia;
   }
 } 

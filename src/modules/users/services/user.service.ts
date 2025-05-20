@@ -1,8 +1,9 @@
 import { UserRepository } from '../repositories/user.repository';
 import { AUTH_SUCCESS } from '../../../constants/success.messages';
+import { ERROR_MESSAGES } from '../../../constants/error.messages';
 import { ApiResponse } from '../../../types/common.types';
 import { User, UserResponse, UpdateUserDto } from '../types/user.types';
-import { NotFoundError, InternalServerError } from 'elysia';
+import { NotFoundError, ValidationError } from '../../../errors/base.error';
 
 export class UserService {
   private userRepository: UserRepository;
@@ -12,61 +13,64 @@ export class UserService {
   }
 
   async getProfile(userId: number): Promise<UserResponse> {
-    try {
-      const user = await this.userRepository.findById(userId);
-      
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
-      
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      };
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      throw new InternalServerError('Failed to get profile');
+    const user = await this.userRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
+    
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    };
   }
 
-  async updateUser(userId: number, userData: Partial<UserResponse>): Promise<UserResponse> {
-    try {
-      const user = await this.userRepository.update(userId, userData);
-      
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
-      
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      };
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      throw new InternalServerError('Failed to update profile');
+  async updateUser(userId: number, userData: UpdateUserDto): Promise<UserResponse> {
+    const user = await this.userRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
+    
+    const updatedUser = await this.userRepository.update(userId, userData);
+    
+    if (!updatedUser) {
+      throw new ValidationError(ERROR_MESSAGES.UPDATE_FAILED);
+    }
+    
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name
+    };
   }
 
   async deleteUser(userId: number): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+    
     try {
-      const user = await this.userRepository.findById(userId);
-      
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
-
       await this.userRepository.delete(userId);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      throw new InternalServerError('Failed to delete user');
+      throw new ValidationError(ERROR_MESSAGES.DELETE_FAILED);
     }
+  }
+
+  async getUser(userId: number): Promise<UserResponse> {
+    const user = await this.userRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+    
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    };
   }
 } 

@@ -1,6 +1,8 @@
 import { Elysia } from 'elysia';
 import { ApiResponse } from '../types/api.types';
 import { jwt } from '@elysiajs/jwt';
+import { AppError } from '../errors/base.error';
+import { timestamp } from 'drizzle-orm/gel-core';
 
 export abstract class BaseController {
   protected abstract prefix: string;
@@ -13,10 +15,13 @@ export abstract class BaseController {
     };
   }
 
-  protected error(message: string): ApiResponse {
+  protected error(message: string, code: string = 'INTERNAL_SERVER_ERROR'): ApiResponse {
     return {
       success: false,
-      error: message
+      error: {
+        message,
+        code
+      }
     };
   }
 
@@ -28,6 +33,19 @@ export abstract class BaseController {
         name: 'jwt',
         secret: process.env.JWT_SECRET || 'your-secret-key'
       }))
+      .onError(({ error, set }) => {
+        console.error('Base controller error:', error.code);
+        set.status = (error as AppError).statusCode;
+        set.headers['content-type'] = 'application/json';
+        return {
+          success: false,
+          error: {
+            message: (error as AppError).message || 'Internal server error',
+            code: (error as AppError).code
+          },
+          timestamp: new Date().toISOString()
+        };
+      })
       .use(this.routes()) as unknown as Elysia;
   }
 } 
