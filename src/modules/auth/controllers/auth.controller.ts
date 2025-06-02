@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import { authMiddleware } from '../../../middleware/auth.middleware';
 import { BaseController } from '../../../controllers/base.controller';
 import { AuthService } from '../services/auth.service';
+import { GoogleOAuthService } from '../services/google-oauth.service';
 import { RegisterDto, LoginDto } from '../types/auth.types';
 import {
   registerSchema,
@@ -10,10 +11,12 @@ import {
   loginResponseSchema,
   loginSchema,
 } from '../schema';
+import { BadRequestError } from '../../../errors/base.error';
 
 export class AuthController extends BaseController {
   protected prefix = '/auth';
   private authService: AuthService;
+  private googleOAuthService = new GoogleOAuthService();
 
   constructor() {
     super();
@@ -26,8 +29,17 @@ export class AuthController extends BaseController {
       .post(
         '/register',
         async ({ body }) => {
-          const user = await this.authService.register(body as RegisterDto);
-          return { success: true, data: user };
+          const result = await this.authService.register(body as RegisterDto);
+          return {
+            success: true,
+            data: {
+              id: result.user.id,
+              email: result.user.email,
+              firstName: result.user.firstName,
+              lastName: result.user.lastName,
+            },
+            message: 'User registered successfully',
+          };
         },
         {
           body: registerSchema,
@@ -58,7 +70,19 @@ export class AuthController extends BaseController {
         '/login',
         async ({ body }) => {
           const result = await this.authService.login(body as LoginDto);
-          return { success: true, data: result };
+          return {
+            success: true,
+            data: {
+              token: result.token,
+              user: {
+                id: result.user.id,
+                email: result.user.email,
+                firstName: result.user.firstName,
+                lastName: result.user.lastName,
+              },
+            },
+            message: 'User logged in successfully',
+          };
         },
         {
           body: loginSchema,
@@ -82,6 +106,32 @@ export class AuthController extends BaseController {
             ],
           },
         }
-      ) as unknown as Elysia;
+      )
+      .get('/google', ({ request }) => {
+        const params = new URLSearchParams({
+          client_id: this.googleOAuthService['clientId'],
+          redirect_uri: this.googleOAuthService['redirectUri'],
+          response_type: 'code',
+          scope: 'openid email profile',
+          access_type: 'offline',
+          prompt: 'consent',
+        });
+        return Response.redirect(
+          `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+        );
+      })
+      .get('/google/callback', async ({ query, set }) => {
+        console.log('query', query, set);
+        const code = query.code;
+        if (!code) {
+          throw new BadRequestError('No code provided');
+        }
+
+        const { access_token } = await this.googleOAuthService.getToken(code);
+        const profile = await this.googleOAuthService.getUserInfo(access_token);
+        const result = await this.authService.loginOrRegisterWithGoogle(profile);
+
+        return { success: true, token: result.token, user: result.user };
+      }) as unknown as Elysia;
   }
 }

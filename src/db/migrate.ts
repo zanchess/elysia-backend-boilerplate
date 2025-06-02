@@ -1,11 +1,14 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import { Pool } from 'pg';
+import 'dotenv/config';
 
 const runMigration = async () => {
-  const connectionString = 'postgres://postgres:postgres@localhost:5432/elysia_db';
-  const sql = postgres(connectionString, { max: 1 });
-  const db = drizzle(sql);
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  const db = drizzle(pool);
 
   console.log('Running migrations...');
 
@@ -13,10 +16,10 @@ const runMigration = async () => {
 
   console.log('Migrations completed!');
 
-  await sql.end();
+  await pool.end();
 };
 
-runMigration().catch(err => {
+runMigration().catch((err) => {
   console.error('Migration failed!');
   console.error(err);
   process.exit(1);

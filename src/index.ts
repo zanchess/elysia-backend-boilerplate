@@ -10,7 +10,7 @@ import 'dotenv/config';
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || '/api';
 
-const app = new Elysia()
+const app = new Elysia({ prefix: API_PREFIX })
   .use(cors())
   .use(
     swagger({

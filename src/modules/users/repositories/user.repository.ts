@@ -1,24 +1,28 @@
 import { db } from '../../../db';
 import { users } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
-import { User } from '../types/user.types';
+import { InferSelectModel } from 'drizzle-orm';
+
+type UserModel = InferSelectModel<typeof users>;
 
 export class UserRepository {
-  async findById(id: number): Promise<User | null> {
+  async findById(id: number): Promise<UserModel | null> {
     const result = await db.query.users.findFirst({
       where: eq(users.id, id),
     });
     return result || null;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserModel | null> {
     const result = await db.query.users.findFirst({
       where: eq(users.email, email),
     });
     return result || null;
   }
 
-  async create(data: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<User> {
+  async create(
+    data: Omit<UserModel, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>
+  ): Promise<UserModel> {
     const result = await db
       .insert(users)
       .values({
@@ -32,7 +36,7 @@ export class UserRepository {
     return result[0];
   }
 
-  async update(id: number, data: Partial<User>): Promise<User | null> {
+  async update(id: number, data: Partial<UserModel>): Promise<UserModel | null> {
     const result = await db
       .update(users)
       .set({

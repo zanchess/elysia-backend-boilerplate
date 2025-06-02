@@ -14,7 +14,8 @@ export const loginSchema = t.Object({
 export const userResponseSchema = t.Object({
   id: t.Number(),
   email: t.String(),
-  name: t.String(),
+  firstName: t.String(),
+  lastName: t.String(),
 });
 
 export const registerResponseSchema = t.Object({
