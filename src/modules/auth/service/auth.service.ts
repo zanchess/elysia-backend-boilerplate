@@ -96,7 +96,7 @@ export class AuthService {
         isActive: true,
       });
     }
-    
+
     const token = await this.jwtService.sign({ userId: user.id });
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 дней
     await this.sessionRepository.createSession({

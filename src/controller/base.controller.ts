@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
-import { ApiResponse } from '../types/api.types';
+import { ApiResponse } from '../type/api.types';
 import { jwt } from '@elysiajs/jwt';
-import { AppError } from '../errors/base.error';
+import { AppError } from '../error/base.error';
 
 export abstract class BaseController {
   protected abstract prefix: string;

@@ -1,9 +1,9 @@
 import { Elysia } from 'elysia';
 import { authMiddleware } from '../../../middleware/auth.middleware';
-import { BaseController } from '../../../controllers/base.controller';
-import { AuthService } from '../services/auth.service';
-import { GoogleOAuthService } from '../services/google-oauth.service';
-import { RegisterDto, LoginDto } from '../types/auth.types';
+import { BaseController } from '../../../controller/base.controller';
+import { AuthService } from '../service/auth.service';
+import { GoogleOAuthService } from '../service/google-oauth.service';
+import { RegisterDto, LoginDto } from '../type/auth.types';
 import {
   registerSchema,
   registerResponseSchema,
@@ -11,7 +11,7 @@ import {
   loginResponseSchema,
   loginSchema,
 } from '../schema';
-import { BadRequestError } from '../../../errors/base.error';
+import { BadRequestError } from '../../../error/base.error';
 
 export class AuthController extends BaseController {
   protected prefix = '/auth';

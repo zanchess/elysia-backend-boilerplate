@@ -1,8 +1,8 @@
 import { db } from '../../../db';
 import { users } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
-import { UpdateUserDto } from '../../users/types/user.types';
-import { RegisterDto } from '../types/auth.types';
+import { UpdateUserDto } from '../../user/type/user.types';
+import { RegisterDto } from '../type/auth.types';
 import { InferSelectModel } from 'drizzle-orm';
 
 type UserModel = InferSelectModel<typeof users>;

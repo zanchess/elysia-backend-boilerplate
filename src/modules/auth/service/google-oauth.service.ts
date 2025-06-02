@@ -1,7 +1,6 @@
-import axios from 'axios'
+import axios from 'axios';
 import { JwtService } from './jwt.service';
-import { BadRequestError } from '../../../errors/base.error';
-import { InternalServerError } from 'elysia';
+import { BadRequestError } from '../../../error/base.error';
 
 export interface GoogleUserInfoResponse {
   sub: string;
@@ -43,7 +42,7 @@ export class GoogleOAuthService {
       if (axios.isAxiosError(err) && err.response) {
         throw new BadRequestError(JSON.stringify(err.response.data));
       }
-      throw new InternalServerError(err instanceof Error ? err.message : 'Unknown error');
+      throw err;
     }
   }
 
@@ -57,7 +56,7 @@ export class GoogleOAuthService {
       if (axios.isAxiosError(err) && err.response) {
         throw new BadRequestError(JSON.stringify(err.response.data));
       }
-      throw new InternalServerError(err instanceof Error ? err.message : 'Unknown error');
+      throw err;
     }
   }
-} 
+}

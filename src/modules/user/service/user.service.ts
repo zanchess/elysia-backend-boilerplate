@@ -1,7 +1,7 @@
-import { UserRepository } from '../repositories/user.repository';
-import { ERROR_MESSAGES } from '../../../constants/error.messages';
-import { UserResponse, UpdateUserDto } from '../types/user.types';
-import { NotFoundError, ValidationError } from '../../../errors/base.error';
+import { UserRepository } from '../repository/user.repository';
+import { ERROR_MESSAGES } from '../../../constant/error.messages';
+import { UserResponse, UpdateUserDto } from '../type/user.types';
+import { NotFoundError, ValidationError } from '../../../error/base.error';
 
 export class UserService {
   private userRepository: UserRepository;

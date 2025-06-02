@@ -2,10 +2,10 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { jwt } from '@elysiajs/jwt';
-import { AuthController } from './modules/auth/controllers/auth.controller';
-import { UserController } from './modules/users/controllers/user.controller';
-import { logRoutes } from './utils/route-logger';
 import 'dotenv/config';
+import { logRoutes } from './util/route-logger';
+import { AuthController } from './modules/auth/controller/auth.controller';
+import { UserController } from './modules/user/controller/user.controller';
 
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || '/api';

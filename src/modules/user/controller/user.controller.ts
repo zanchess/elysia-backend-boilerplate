@@ -1,9 +1,9 @@
 import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../../../middleware/auth.middleware';
-import { BaseController } from '../../../controllers/base.controller';
-import { UserService } from '../services/user.service';
+import { BaseController } from '../../../controller/base.controller';
+import { UserService } from '../service/user.service';
 import { userResponseSchema, updateUserSchema, errorResponseSchema } from '../schema';
-import { UpdateUserDto } from '../types/user.types';
+import { UpdateUserDto } from '../type/user.types';
 
 export class UserController extends BaseController {
   protected prefix = '/users';

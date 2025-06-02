@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
-import { ERROR_MESSAGES } from '../constants/error.messages';
-import { AuthenticationError } from '../errors/base.error';
-import { JwtService } from '../modules/auth/services/jwt.service';
+import { ERROR_MESSAGES } from '../constant/error.messages';
+import { AuthenticationError } from '../error/base.error';
+import { JwtService } from '../modules/auth/service/jwt.service';
 
 const jwtService = new JwtService();
 
