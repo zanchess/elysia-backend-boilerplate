@@ -1,5 +1,4 @@
 import { Elysia } from 'elysia';
-import { authMiddleware } from '../../../middleware/auth.middleware';
 import { BaseController } from '../../../controller/base.controller';
 import { AuthService } from '../service/auth.service';
 import { GoogleOAuthService } from '../service/google-oauth.service';
@@ -25,7 +24,6 @@ export class AuthController extends BaseController {
 
   protected routes() {
     return new Elysia()
-      .use(authMiddleware)
       .post(
         '/register',
         async ({ body }) => {
@@ -107,7 +105,7 @@ export class AuthController extends BaseController {
           },
         }
       )
-      .get('/google', ({ request }) => {
+      .get('/google', () => {
         const params = new URLSearchParams({
           client_id: this.googleOAuthService['clientId'],
           redirect_uri: this.googleOAuthService['redirectUri'],
@@ -120,8 +118,7 @@ export class AuthController extends BaseController {
           `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
         );
       })
-      .get('/google/callback', async ({ query, set }) => {
-        console.log('query', query, set);
+      .get('/google/callback', async ({ query }) => {
         const code = query.code;
         if (!code) {
           throw new BadRequestError('No code provided');

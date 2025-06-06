@@ -7,7 +7,7 @@ export class JwtService {
     this.secret = process.env.JWT_SECRET || 'your-secret-key';
   }
 
-  async sign(payload: { userId: number }): Promise<string> {
+  async sign(payload: { userId: number; roleTypes: string[] }): Promise<string> {
     return jwt.sign(payload, this.secret, { expiresIn: '24h' });
   }
 

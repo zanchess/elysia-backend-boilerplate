@@ -32,12 +32,10 @@ export class GoogleOAuthService {
     });
 
     try {
-      console.log('redirect_uri:', this.redirectUri);
-      const res = await axios.post('https://oauth2.googleapis.com/token', params, {
+      const { data } = await axios.post('https://oauth2.googleapis.com/token', params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
-      console.log('res:', res.data);
-      return res.data;
+      return data;
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         throw new BadRequestError(JSON.stringify(err.response.data));
@@ -48,10 +46,10 @@ export class GoogleOAuthService {
 
   async getUserInfo(accessToken: string): Promise<GoogleUserInfoResponse> {
     try {
-      const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      const { data } = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      return res.data;
+      return data;
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         throw new BadRequestError(JSON.stringify(err.response.data));

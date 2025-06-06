@@ -17,4 +17,5 @@ export const ERROR_MESSAGES = {
   USER_CREATION_FAILED: 'Failed to create user',
   DELETE_FAILED: 'Failed to delete user',
   REGISTRATION_FAILED: 'Registration failed',
+  FORBIDDEN: 'Forbidden error',
 } as const;

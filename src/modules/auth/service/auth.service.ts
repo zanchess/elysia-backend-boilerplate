@@ -4,17 +4,8 @@ import { ERROR_MESSAGES } from '../../../constant/error.messages';
 import { AuthenticationError, ConflictError } from '../../../error/base.error';
 import { UserRepository } from '../../user/repository/user.repository';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import { generateRandomPassword } from '../../../util/password';
 import { SessionRepository } from '../repository/session.repository';
-
-export const googleProfileSchema = z.object({
-  email: z.string().email(),
-  given_name: z.string(),
-  family_name: z.string(),
-  picture: z.string().url().optional(),
-});
-export type GoogleProfile = z.infer<typeof googleProfileSchema>;
 
 export class AuthService {
   private jwtService: JwtService;
@@ -44,7 +35,10 @@ export class AuthService {
       throw new Error(ERROR_MESSAGES.USER_CREATION_FAILED);
     }
 
-    const token = await this.jwtService.sign({ userId: user.id });
+    const token = await this.jwtService.sign({
+      userId: user.id,
+      roleTypes: user.roles.map((role: { roleType: string }) => role.roleType),
+    });
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 дней
     await this.sessionRepository.createSession({
       userId: user.id,
@@ -67,7 +61,10 @@ export class AuthService {
     }
 
     // Создание JWT токена
-    const token = await this.jwtService.sign({ userId: user.id });
+    const token = await this.jwtService.sign({
+      userId: user.id,
+      roleTypes: user.roles.map((role: { roleType: string }) => role.roleType),
+    });
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 дней
     await this.sessionRepository.createSession({
       userId: user.id,
@@ -81,8 +78,14 @@ export class AuthService {
     };
   }
 
-  async loginOrRegisterWithGoogle(profile: GoogleProfile) {
+  async loginOrRegisterWithGoogle(profile: {
+    email: string;
+    given_name: string;
+    family_name: string;
+    picture: string;
+  }) {
     let user = await this.userRepository.findByEmail(profile.email);
+
     if (!user) {
       const rawPassword = generateRandomPassword();
       console.log('rawPassword', rawPassword);
@@ -97,7 +100,10 @@ export class AuthService {
       });
     }
 
-    const token = await this.jwtService.sign({ userId: user.id });
+    const token = await this.jwtService.sign({
+      userId: user.id,
+      roleTypes: user.roles.map((role: { roleType: string }) => role.roleType),
+    });
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 дней
     await this.sessionRepository.createSession({
       userId: user.id,

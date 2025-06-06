@@ -14,9 +14,16 @@ import {
 import { relations } from 'drizzle-orm';
 
 // Enums
-export const roleTypeEnum = pgEnum('role_type', ['DISMISSED', 'USER', 'MODERATOR']);
 export const formStatusEnum = pgEnum('form_status', ['DRAFT', 'PUBLISHED']);
 export const feedbackStatusEnum = pgEnum('feedback_status', ['DRAFT', 'PUBLISHED']);
+export const roleTypeEnum = pgEnum('role_type', [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'MODERATOR',
+  'MANAGER',
+  'USER',
+  'GUEST',
+]);
 
 // Tables
 export const users: PgTableWithColumns<any> = pgTable('user', {
@@ -59,7 +66,8 @@ export const titles = pgTable('title', {
 
 export const roles = pgTable('role', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: roleTypeEnum('name').notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
+  roleType: roleTypeEnum('role_type').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

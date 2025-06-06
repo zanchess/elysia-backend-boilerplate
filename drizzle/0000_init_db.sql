@@ -1,6 +1,6 @@
 CREATE TYPE "public"."feedback_status" AS ENUM('DRAFT', 'PUBLISHED');--> statement-breakpoint
 CREATE TYPE "public"."form_status" AS ENUM('DRAFT', 'PUBLISHED');--> statement-breakpoint
-CREATE TYPE "public"."role_type" AS ENUM('DISMISSED', 'USER', 'MODERATOR');--> statement-breakpoint
+CREATE TYPE "public"."role_type" AS ENUM('SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'MANAGER', 'USER', 'GUEST');--> statement-breakpoint
 CREATE TABLE "department" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -67,10 +67,10 @@ CREATE TABLE "notification" (
 --> statement-breakpoint
 CREATE TABLE "role" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" "role_type" NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"role_type" "role_type" NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "role_name_unique" UNIQUE("name")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "seniority" (
@@ -79,6 +79,15 @@ CREATE TABLE "seniority" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "seniority_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE "session" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"token" varchar(512) NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE "title" (
@@ -104,6 +113,7 @@ CREATE TABLE "user" (
 	"email" varchar(255) NOT NULL,
 	"first_name" varchar(255) NOT NULL,
 	"last_name" varchar(255) NOT NULL,
+	"password" varchar NOT NULL,
 	"seniority_id" uuid,
 	"department_id" uuid,
 	"title_id" uuid,
@@ -123,6 +133,7 @@ ALTER TABLE "form_version" ADD CONSTRAINT "form_version_form_id_form_id_fk" FORE
 ALTER TABLE "form" ADD CONSTRAINT "form_created_by_id_user_id_fk" FOREIGN KEY ("created_by_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification" ADD CONSTRAINT "notification_email_template_id_email_template_id_fk" FOREIGN KEY ("email_template_id") REFERENCES "public"."email_template"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification" ADD CONSTRAINT "notification_recipient_id_user_id_fk" FOREIGN KEY ("recipient_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_role" ADD CONSTRAINT "user_role_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_role" ADD CONSTRAINT "user_role_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user" ADD CONSTRAINT "user_seniority_id_seniority_id_fk" FOREIGN KEY ("seniority_id") REFERENCES "public"."seniority"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

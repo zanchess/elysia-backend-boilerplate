@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747828892199,
-      "tag": "0000_app_bd",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747829371740,
-      "tag": "0001_user_password",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1748897833030,
-      "tag": "0002_session",
+      "when": 1749154192403,
+      "tag": "0000_init_db",
       "breakpoints": true
     }
   ]

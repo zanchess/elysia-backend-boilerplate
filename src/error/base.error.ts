@@ -45,3 +45,9 @@ export class BadRequestError extends AppError {
     super(message, 400, 'BAD_REQUEST');
   }
 }
+
+export class ForbiddenError extends AppError {
+  constructor(message: string) {
+    super(message, 403, 'FORBIDDEN');
+  }
+}

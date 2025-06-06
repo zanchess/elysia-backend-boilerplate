@@ -19,10 +19,9 @@ export class UserController extends BaseController {
       .use(authMiddleware)
       .get(
         '/me',
-        async ({ requireAuth, request }) => {
-          const payload = await requireAuth(request);
-          const user = await this.userService.getProfile(payload.userId);
-          return { success: true, data: user };
+        async ({ user }) => {
+          const userData = await this.userService.getProfile(user.id);
+          return { success: true, data: userData };
         },
         {
           response: {
@@ -39,10 +38,9 @@ export class UserController extends BaseController {
       )
       .put(
         '/me',
-        async ({ requireAuth, request, body }) => {
-          const payload = await requireAuth(request);
-          const user = await this.userService.updateUser(payload.userId, body as UpdateUserDto);
-          return { success: true, data: user };
+        async ({ user, body }) => {
+          const updatedUser = await this.userService.updateUser(user.id, body as UpdateUserDto);
+          return { success: true, data: updatedUser };
         },
         {
           body: updateUserSchema,
@@ -61,9 +59,8 @@ export class UserController extends BaseController {
       )
       .delete(
         '/me',
-        async ({ requireAuth, request }) => {
-          const payload = await requireAuth(request);
-          await this.userService.deleteUser(payload.userId);
+        async ({ user }) => {
+          await this.userService.deleteUser(user.id);
           return {
             success: true,
             message: 'User deleted successfully',
@@ -87,8 +84,7 @@ export class UserController extends BaseController {
       )
       .get(
         '/:id',
-        async ({ requireAuth, request, params }) => {
-          await requireAuth(request); // Require authentication but don't use the ID
+        async ({ params }) => {
           const user = await this.userService.getUser(Number(params.id));
           return { success: true, data: user };
         },
@@ -110,8 +106,7 @@ export class UserController extends BaseController {
       )
       .put(
         '/:id',
-        async ({ requireAuth, request, params, body }) => {
-          await requireAuth(request); // Require authentication but don't use the ID
+        async ({ params, body }) => {
           const user = await this.userService.updateUser(Number(params.id), body as UpdateUserDto);
           return { success: true, data: user };
         },

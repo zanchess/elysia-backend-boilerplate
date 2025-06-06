@@ -6,6 +6,7 @@ import 'dotenv/config';
 import { logRoutes } from './util/route-logger';
 import { AuthController } from './modules/auth/controller/auth.controller';
 import { UserController } from './modules/user/controller/user.controller';
+import { RoleController } from './modules/role/controller/role.controller';
 
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || '/api';
@@ -35,7 +36,8 @@ const app = new Elysia({ prefix: API_PREFIX })
     })
   )
   .use(new AuthController().getRoutes())
-  .use(new UserController().getRoutes());
+  .use(new UserController().getRoutes())
+  .use(new RoleController().getRoutes());
 
 // Логируем все маршруты при запуске
 logRoutes(app);
