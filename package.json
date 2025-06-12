@@ -26,6 +26,8 @@
     "elysia": "latest",
     "jsonwebtoken": "^9.0.2",
     "postgres": "^3.4.5",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0",
     "zod": "^3.25.3"
   },
   "devDependencies": {

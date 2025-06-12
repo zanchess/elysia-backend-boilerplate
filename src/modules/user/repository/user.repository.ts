@@ -3,22 +3,24 @@ import { users, userRoles, roles } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { InferSelectModel } from 'drizzle-orm';
 import type { IUserRepository } from './user.repository.interface';
+import { injectable } from 'tsyringe';
 
 type UserModel = InferSelectModel<typeof users>;
 
 export { UserModel };
 
+@injectable()
 export class UserRepository implements IUserRepository {
-  async findById(id: number): Promise<UserModel | null> {
+  async findById(id: number): Promise<UserModel | undefined> {
     const result = await db.query.users.findFirst({
       where: eq(users.id, id),
     });
-    return result || null;
+    return result;
   }
 
-  async findByEmail(email: string): Promise<UserModel | null> {
+  async findByEmail(email: string): Promise<UserModel | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
-    if (!user) return null;
+    if (!user) return undefined;
 
     const userRolesResult = await db
       .select({
@@ -66,7 +68,7 @@ export class UserRepository implements IUserRepository {
     };
   }
 
-  async update(id: number, data: Partial<UserModel>): Promise<UserModel | null> {
+  async update(id: number, data: Partial<UserModel>): Promise<UserModel> {
     const result = await db
       .update(users)
       .set({
@@ -76,7 +78,11 @@ export class UserRepository implements IUserRepository {
       .where(eq(users.id, id))
       .returning();
 
-    return result[0] || null;
+    if (!result[0]) {
+      throw new Error('User not found');
+    }
+
+    return result[0];
   }
 
   async delete(id: number): Promise<void> {

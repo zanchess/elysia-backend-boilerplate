@@ -7,12 +7,14 @@ import { ERROR_MESSAGES } from '../../../constant/error.messages';
 import { AuthenticationError, ConflictError } from '../../../error/base.error';
 import bcrypt from 'bcrypt';
 import { generateRandomPassword } from '../../../util/password';
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class AuthService implements IAuthService {
   constructor(
-    private jwtService: JwtService,
-    private userRepository: IUserRepository,
-    private sessionRepository: ISessionRepository
+    @inject('JwtService') private jwtService: JwtService,
+    @inject('UserRepository') private userRepository: IUserRepository,
+    @inject('SessionRepository') private sessionRepository: ISessionRepository
   ) {}
 
   async register(data: RegisterDto) {

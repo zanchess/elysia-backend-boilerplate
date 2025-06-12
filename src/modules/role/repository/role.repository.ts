@@ -3,7 +3,9 @@ import { roles } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { CreateRoleDto, UpdateRoleDto } from '../type/role.types';
 import type { IRoleRepository } from './role.repository.interface';
+import { injectable } from 'tsyringe';
 
+@injectable()
 export class RoleRepository implements IRoleRepository {
   async create(data: CreateRoleDto) {
     const [role] = await db.insert(roles).values(data).returning();

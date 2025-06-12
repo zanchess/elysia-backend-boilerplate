@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { IGoogleOAuthService } from './google-oauth.service.interface';
 import type { JwtService } from './jwt.service';
 import { BadRequestError } from '../../../error/base.error';
+import { injectable, inject } from 'tsyringe';
 
 export interface GoogleUserInfoResponse {
   sub: string;
@@ -13,13 +14,14 @@ export interface GoogleUserInfoResponse {
   email_verified: boolean;
 }
 
+@injectable()
 export class GoogleOAuthService implements IGoogleOAuthService {
   public readonly clientId = process.env.GOOGLE_CLIENT_ID!;
   private clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
   public readonly redirectUri = process.env.GOOGLE_REDIRECT_URI!;
   private jwtService: JwtService;
 
-  constructor(jwtService: JwtService) {
+  constructor(@inject('JwtService') jwtService: JwtService) {
     this.jwtService = jwtService;
   }
 

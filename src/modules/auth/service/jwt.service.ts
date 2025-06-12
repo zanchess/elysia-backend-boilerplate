@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { injectable } from 'tsyringe';
 
+@injectable()
 export class JwtService {
   private readonly secret: string;
 

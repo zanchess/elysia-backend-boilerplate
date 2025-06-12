@@ -4,12 +4,14 @@ import { BaseController } from '../../../controller/base.controller';
 import type { IUserService } from '../service/user.service.interface';
 import { userResponseSchema, updateUserSchema, errorResponseSchema } from '../schema';
 import { UpdateUserDto } from '../type/user.types';
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class UserController extends BaseController {
   protected prefix = '/users';
   private userService: IUserService;
 
-  constructor(userService: IUserService) {
+  constructor(@inject('UserService') userService: IUserService) {
     super();
     this.userService = userService;
   }

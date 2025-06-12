@@ -11,13 +11,18 @@ import {
   loginSchema,
 } from '../schema';
 import { BadRequestError } from '../../../error/base.error';
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class AuthController extends BaseController {
   protected prefix = '/auth';
   private authService: IAuthService;
   private googleOAuthService: IGoogleOAuthService;
 
-  constructor(authService: IAuthService, googleOAuthService: IGoogleOAuthService) {
+  constructor(
+    @inject('AuthService') authService: IAuthService,
+    @inject('GoogleOAuthService') googleOAuthService: IGoogleOAuthService
+  ) {
     super();
     this.authService = authService;
     this.googleOAuthService = googleOAuthService;

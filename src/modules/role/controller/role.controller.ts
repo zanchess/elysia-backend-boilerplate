@@ -10,12 +10,14 @@ import {
 } from '../schema';
 import type { CreateRoleDto, UpdateRoleDto } from '../type/role.types';
 import { authMiddleware, adminGuard } from '../../../middleware/auth.middleware';
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class RoleController extends BaseController {
   protected prefix = '/roles';
   private roleService: IRoleService;
 
-  constructor(roleService: IRoleService) {
+  constructor(@inject('RoleService') roleService: IRoleService) {
     super();
     this.roleService = roleService;
   }

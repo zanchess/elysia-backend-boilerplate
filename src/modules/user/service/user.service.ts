@@ -1,16 +1,18 @@
 import { ERROR_MESSAGES } from '../../../constant/error.messages';
 import { UserResponse, UpdateUserDto } from '../type/user.types';
 import { NotFoundError, ValidationError } from '../../../error/base.error';
-import type { IUserService } from './user.service.interface';
+import type { IUserService } from './user.service.interface.ts';
 import type { IUserRepository } from '../repository/user.repository.interface';
+import { injectable, inject } from 'tsyringe';
 
+@injectable()
 export class UserService implements IUserService {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(@inject('UserRepository') private userRepository: IUserRepository) {}
 
   async getProfile(userId: number): Promise<UserResponse> {
     const user = await this.userRepository.findById(userId);
 
-    if (!user) {
+    if (user === undefined) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
@@ -24,13 +26,13 @@ export class UserService implements IUserService {
   async updateUser(userId: number, userData: UpdateUserDto): Promise<UserResponse> {
     const user = await this.userRepository.findById(userId);
 
-    if (!user) {
+    if (user === undefined) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     const updatedUser = await this.userRepository.update(userId, userData);
 
-    if (!updatedUser) {
+    if (updatedUser === undefined || updatedUser === null) {
       throw new ValidationError(ERROR_MESSAGES.UPDATE_FAILED);
     }
 
@@ -44,7 +46,7 @@ export class UserService implements IUserService {
   async deleteUser(userId: number): Promise<void> {
     const user = await this.userRepository.findById(userId);
 
-    if (!user) {
+    if (user === undefined) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
@@ -58,7 +60,7 @@ export class UserService implements IUserService {
   async getUser(userId: number): Promise<UserResponse> {
     const user = await this.userRepository.findById(userId);
 
-    if (!user) {
+    if (user === undefined) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
