@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { BaseController } from '../../../controller/base.controller';
-import { RoleService } from '../service/role.service';
+import type { IRoleService } from '../service/role.service.interface';
 import {
   createRoleSchema,
   updateRoleSchema,
@@ -13,7 +13,12 @@ import { authMiddleware, adminGuard } from '../../../middleware/auth.middleware'
 
 export class RoleController extends BaseController {
   protected prefix = '/roles';
-  private roleService = new RoleService();
+  private roleService: IRoleService;
+
+  constructor(roleService: IRoleService) {
+    super();
+    this.roleService = roleService;
+  }
 
   protected routes() {
     return new Elysia().group(this.prefix, app =>

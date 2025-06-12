@@ -1,17 +1,17 @@
 import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../../../middleware/auth.middleware';
 import { BaseController } from '../../../controller/base.controller';
-import { UserService } from '../service/user.service';
+import type { IUserService } from '../service/user.service.interface';
 import { userResponseSchema, updateUserSchema, errorResponseSchema } from '../schema';
 import { UpdateUserDto } from '../type/user.types';
 
 export class UserController extends BaseController {
   protected prefix = '/users';
-  private userService: UserService;
+  private userService: IUserService;
 
-  constructor() {
+  constructor(userService: IUserService) {
     super();
-    this.userService = new UserService();
+    this.userService = userService;
   }
 
   protected routes() {

@@ -4,10 +4,11 @@ import { eq } from 'drizzle-orm';
 import { UpdateUserDto } from '../../user/type/user.types';
 import { RegisterDto } from '../type/auth.types';
 import { InferSelectModel } from 'drizzle-orm';
+import type { IUserRepository } from './user.repository.interface';
 
 type UserModel = InferSelectModel<typeof users>;
 
-export class UserRepository {
+export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<UserModel | undefined> {
     return db.query.users.findFirst({
       where: eq(users.email, email),

@@ -2,10 +2,13 @@ import { db } from '../../../db';
 import { users, userRoles, roles } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { InferSelectModel } from 'drizzle-orm';
+import type { IUserRepository } from './user.repository.interface';
 
 type UserModel = InferSelectModel<typeof users>;
 
-export class UserRepository {
+export { UserModel };
+
+export class UserRepository implements IUserRepository {
   async findById(id: number): Promise<UserModel | null> {
     const result = await db.query.users.findFirst({
       where: eq(users.id, id),

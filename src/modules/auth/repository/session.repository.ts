@@ -1,7 +1,8 @@
 import { db } from '../../../db';
 import { sessions } from '../../../db/schema';
+import type { ISessionRepository } from './session.repository.interface';
 
-export class SessionRepository {
+export class SessionRepository implements ISessionRepository {
   async createSession({
     userId,
     token,

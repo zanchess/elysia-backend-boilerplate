@@ -1,14 +1,11 @@
-import { UserRepository } from '../repository/user.repository';
 import { ERROR_MESSAGES } from '../../../constant/error.messages';
 import { UserResponse, UpdateUserDto } from '../type/user.types';
 import { NotFoundError, ValidationError } from '../../../error/base.error';
+import type { IUserService } from './user.service.interface';
+import type { IUserRepository } from '../repository/user.repository.interface';
 
-export class UserService {
-  private userRepository: UserRepository;
-
-  constructor() {
-    this.userRepository = new UserRepository();
-  }
+export class UserService implements IUserService {
+  constructor(private userRepository: IUserRepository) {}
 
   async getProfile(userId: number): Promise<UserResponse> {
     const user = await this.userRepository.findById(userId);

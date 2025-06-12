@@ -1,8 +1,9 @@
-import { RoleRepository } from '../repository/role.repository';
-import { CreateRoleDto, UpdateRoleDto } from '../type/role.types';
+import type { IRoleService } from './role.service.interface';
+import type { IRoleRepository } from '../repository/role.repository.interface';
+import type { CreateRoleDto, UpdateRoleDto } from '../type/role.types';
 
-export class RoleService {
-  private roleRepository = new RoleRepository();
+export class RoleService implements IRoleService {
+  constructor(private roleRepository: IRoleRepository) {}
 
   async createRole(data: CreateRoleDto) {
     return this.roleRepository.create(data);

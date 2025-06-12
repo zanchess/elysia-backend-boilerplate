@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import { BaseController } from '../../../controller/base.controller';
-import { AuthService } from '../service/auth.service';
-import { GoogleOAuthService } from '../service/google-oauth.service';
+import type { IAuthService } from '../service/auth.service.interface';
+import type { IGoogleOAuthService } from '../service/google-oauth.service.interface';
 import { RegisterDto, LoginDto } from '../type/auth.types';
 import {
   registerSchema,
@@ -14,12 +14,13 @@ import { BadRequestError } from '../../../error/base.error';
 
 export class AuthController extends BaseController {
   protected prefix = '/auth';
-  private authService: AuthService;
-  private googleOAuthService = new GoogleOAuthService();
+  private authService: IAuthService;
+  private googleOAuthService: IGoogleOAuthService;
 
-  constructor() {
+  constructor(authService: IAuthService, googleOAuthService: IGoogleOAuthService) {
     super();
-    this.authService = new AuthService();
+    this.authService = authService;
+    this.googleOAuthService = googleOAuthService;
   }
 
   protected routes() {
@@ -107,8 +108,8 @@ export class AuthController extends BaseController {
       )
       .get('/google', () => {
         const params = new URLSearchParams({
-          client_id: this.googleOAuthService['clientId'],
-          redirect_uri: this.googleOAuthService['redirectUri'],
+          client_id: this.googleOAuthService.clientId,
+          redirect_uri: this.googleOAuthService.redirectUri,
           response_type: 'code',
           scope: 'openid email profile',
           access_type: 'offline',

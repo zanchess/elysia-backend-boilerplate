@@ -1,22 +1,19 @@
 import { RegisterDto, LoginDto } from '../type/auth.types';
-import { JwtService } from './jwt.service';
+import type { IAuthService } from './auth.service.interface';
+import type { IUserRepository } from '../repository/user.repository.interface';
+import type { ISessionRepository } from '../repository/session.repository.interface';
+import type { JwtService } from './jwt.service';
 import { ERROR_MESSAGES } from '../../../constant/error.messages';
 import { AuthenticationError, ConflictError } from '../../../error/base.error';
-import { UserRepository } from '../../user/repository/user.repository';
 import bcrypt from 'bcrypt';
 import { generateRandomPassword } from '../../../util/password';
-import { SessionRepository } from '../repository/session.repository';
 
-export class AuthService {
-  private jwtService: JwtService;
-  private userRepository: UserRepository;
-  private sessionRepository: SessionRepository;
-
-  constructor() {
-    this.jwtService = new JwtService();
-    this.userRepository = new UserRepository();
-    this.sessionRepository = new SessionRepository();
-  }
+export class AuthService implements IAuthService {
+  constructor(
+    private jwtService: JwtService,
+    private userRepository: IUserRepository,
+    private sessionRepository: ISessionRepository
+  ) {}
 
   async register(data: RegisterDto) {
     const existingUser = await this.userRepository.findByEmail(data.email);

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { JwtService } from './jwt.service';
+import type { IGoogleOAuthService } from './google-oauth.service.interface';
+import type { JwtService } from './jwt.service';
 import { BadRequestError } from '../../../error/base.error';
 
 export interface GoogleUserInfoResponse {
@@ -12,14 +13,14 @@ export interface GoogleUserInfoResponse {
   email_verified: boolean;
 }
 
-export class GoogleOAuthService {
-  private clientId = process.env.GOOGLE_CLIENT_ID!;
+export class GoogleOAuthService implements IGoogleOAuthService {
+  public readonly clientId = process.env.GOOGLE_CLIENT_ID!;
   private clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-  private redirectUri = process.env.GOOGLE_REDIRECT_URI!;
+  public readonly redirectUri = process.env.GOOGLE_REDIRECT_URI!;
   private jwtService: JwtService;
 
-  constructor() {
-    this.jwtService = new JwtService();
+  constructor(jwtService: JwtService) {
+    this.jwtService = jwtService;
   }
 
   async getToken(code: string): Promise<{ access_token: string; id_token: string }> {
